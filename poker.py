@@ -12,7 +12,7 @@ class PokerProb:
 
     @staticmethod
     def give_cards(deck, hand):
-        cards = [deck.pop() for x in range(5 - len(hand))]
+        cards = [deck.pop() for x in range(7 - len(hand))]
         for x in cards: hand.append(x)
 
     @staticmethod
@@ -62,24 +62,22 @@ class PokerProb:
     @staticmethod
     def royal_flush(lista):
         rf = {'AH','KH','QH','JH','10H'}
-        if rf == set(lista):
+        if rf.issubset(set(lista)):
             return True 
         else: 
             return False 
         
     def straight_flush(self, lista):
         values = {x[:-1] for x in lista}
-        naipes = {x[-1] for x in lista}
-        if not self.royal_flush(lista):
-            if values in self.set_combinations:
-                if len(naipes) == 1:
+        naipes = self.naipe_dict(lista)
+        if any([x.issubset(values) for x in self.set_combinations]):
+            if 5 in naipes.values():
+                if not self.royal_flush(lista):
                     return True 
                 else:
-                    return False 
-            else:
-                return False 
-        else:
-            return False 
+                    return False
+            else: return False 
+        else: return False 
 
     def four_of_a_kind(self, lista):
         d = self.number_dict(lista)
@@ -90,35 +88,40 @@ class PokerProb:
 
     def full_house(self, lista):
         d = self.number_dict(lista)
-        if {2,3} == set(d.values()):
+        if {2,3}.issubset(set(d.values())):
             return True 
         else:
             return False 
 
     def flush(self, lista):
-        values = {x[:-1] for x in lista}
-        if len(self.naipe_dict(lista)) == 1:
-            if values not in self.set_combinations:
-                return True 
-            else:
-                return False
-        else:
-            return False 
-
-    def straight(self, lista):
         d = self.naipe_dict(lista)
-        values = {x[:-1] for x in lista}
-        if values in self.set_combinations:
-            if len(d) != 1:
-                return True 
+        if 5 in d.values():
+            if not self.straight_flush(lista):
+                if not self.royal_flush(lista):
+                    return True 
+                else:
+                    return False 
             else:
                 return False 
         else:
             return False 
 
+    def straight(self, lista):
+        values = {x[:-1] for x in lista}
+        if any([values.issuperset(x) for x in self.set_combinations]):
+            if not self.royal_flush(lista):
+                if not self.straight_flush(lista):
+                    return True 
+                else: 
+                    return False 
+            else:
+                return False 
+        else: 
+            return False 
+
     def three(self, lista):
         d = self.number_dict(lista)
-        if {3,1,1} in set(d.values()):
+        if 3 in d.values():
             return True 
         else:
             return False 
@@ -151,4 +154,6 @@ if __name__ == '__main__':
     p1 = PokerProb(['5C','6C','7C'])
     print(p1.calc_probs())
     p1 = PokerProb(['AD','AC','AH'])
+    print(p1.calc_probs())
+    p1 = PokerProb(['AD','AC'])
     print(p1.calc_probs())
